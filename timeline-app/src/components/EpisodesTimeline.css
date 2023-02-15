@@ -1,0 +1,58 @@
+.episodeTimelineBlock {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid lightgray;
+    margin: 0px 20px 20px 20px;
+    padding: 60px 20px 60px 20px;
+  }
+  
+  
+  .fa-tv {
+    font-size: 36px;
+    color:  #505AB8;
+  }
+  
+  
+  .timelineContentRight::after {
+    content: "";
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    background-color: white;
+    top: 45%;
+    left: 5px;
+    border-top: lightgrey solid 0.5px;
+    border-left: lightgrey solid 0.5px;
+    transform: rotate(-45deg);
+  }
+  .timelineContentRight {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    /* align-items:flex-start; */
+    margin-top: 30px;
+    margin-bottom: 30px; 
+  }
+  
+  .timelineContentLeft::after {
+    content: "";
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    background-color: white;
+    top: 45%;
+    right: 5px;
+    border-top: lightgrey solid 0.5px;
+    border-left: lightgrey solid 0.5px;
+    transform: rotate(135deg);
+  }
+  
+  .timelineContentLeft {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    /* align-items: flex-start; */
+    margin-top: 30px;
+    margin-bottom: 30px; 
+  };

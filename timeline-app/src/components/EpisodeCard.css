@@ -1,0 +1,60 @@
+/* EPISODE CARD */
+.episode-card {
+    height:100%;
+    width: 70%;
+    text-align: left;
+    padding-left: 1.2rem;
+    }
+    
+    /* DATE SECTION */
+    .date-section {
+      background-color: #505AB8;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: top;
+      height: 90px;
+      clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
+      border-radius: 5px 5px 0 0;
+      width: 260px;
+    }
+  
+  
+  /* TITLE/CODE SECTION */
+    .episode-title{
+      width: 100%;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      padding-top: 1rem;
+      margin-bottom:10px;
+    }
+  
+    .episode-code{
+      margin: 0;
+      padding: 0;
+    }
+  
+    /* CHARACTER SECTION */
+    .char-title{
+      color: gray;
+      margin-top: 40px;
+      margin-bottom: 2px;
+    }
+    .char-ul{
+      margin-top: 0px;
+      font-weight: bold;
+      color: #616161;
+      list-style-type: disc;
+      padding-bottom: 2rem;
+    }
+  
+    .day{
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  
+    .month{
+      font-size: 1.2rem;
+      font-weight: light;
+    }
