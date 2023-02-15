@@ -1,9 +1,0 @@
-[build]
-  command = "cd timeline-app && yarn install && yarn build"
-  publish = "timeline-app/build"
-
-
-[[redirects]]
-  from = "/test-timeline-react"
-  to = "/test-timeline-react/timeline-app"
-  status = 200
