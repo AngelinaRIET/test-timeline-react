@@ -53,8 +53,8 @@ function App() {
         } else {
           // If the data is not in local storage, fetch it from the API
           const [episodesData, charactersData] = await Promise.all([
-            fetch("https://rickandmortyapi.com/api/episode/"),
-            fetch("https://rickandmortyapi.com/api/character"),
+            fetch("https://cors-anywhere.herokuapp.com/https://rickandmortyapi.com/api/episode/"),
+            fetch("https://cors-anywhere.herokuapp.com/https://rickandmortyapi.com/api/character"),
           ]);
           // Store the data in local storage for later use
           localStorage.setItem(
