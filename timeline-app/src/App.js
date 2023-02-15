@@ -160,7 +160,7 @@ function App() {
 
   return (
     <div className="App">
-      <div>Hello, world!</div>
+
       {error && (
         <div className="error-message">
           An error occurred while trying to display the episodes of Rick & Morty
