@@ -5,5 +5,5 @@
 
 [[redirects]]
   from = "/test-timeline-react"
-  to = "/test-timeline-react/tree/main/timeline-app"
+  to = "/test-timeline-react/timeline-app"
   status = 200
