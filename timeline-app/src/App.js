@@ -164,8 +164,7 @@ function App() {
       {error && (
         <div className="error-message">
           An error occurred while trying to display the episodes of Rick & Morty
-          are not available at the moment. Please try again later or check your
-          network connection..
+          Please try again later or check your network connection..
         </div>
       )}
       <SearchBar
