@@ -69,7 +69,7 @@ You will write  tests for this function:
 
 #### Design
 
-![Timeline](./visuals/timeline.png)
+![Timeline](./timeline.png)
 
 
 #### Sum up - what's expected
