@@ -91,12 +91,12 @@ function EpisodesTimeline({
           </div>
           <Timeline className={classes.timeLine}>
             <>
-              {episodes.map((episode, index) => (
+              {episodes.map((episode, id) => (
                 <TimelineItem
-                  key={index}
+                  key={id}
                   className={classes.customMissingOppositeContent}
                 >
-                  {index % 2 === 0 ? (
+                  {id % 2 === 0 ? (
                     <>
                       <TimelineOppositeContent
                         className={classes.timelineOppositeContentLeft}

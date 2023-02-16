@@ -13,7 +13,6 @@ import "./components/SearchBar.css";
 
 import { fullMonths, abbreviatedMonths } from "./constants/constants";
 
-
 // Reducer to update the selected month based on the action type
 const selectedMonthReducer = (state, action) => {
   const handlers = {
@@ -26,9 +25,12 @@ const selectedMonthReducer = (state, action) => {
   return handle();
 };
 
-const get = async (endpoint) => {
+// Function to fetch data from the Rick & Morty API
+const get = async (endpoint, searchInput) => {
   try {
-    const res = await fetch(`https://rickandmortyapi.com/api/${endpoint}`);
+    const res = await fetch(
+      `https://rickandmortyapi.com/api/${endpoint}?name=${searchInput}`
+    );
     const data = await res.json();
     return { data, status: res.status, statusMessage: res.statusText };
   } catch (error) {
@@ -64,8 +66,8 @@ function App() {
         } else {
           // If the data is not in local storage, fetch it from the API
           const [episodesData, charactersData] = await Promise.all([
-          get("episode/"),
-          get("character/"),
+            get("episode/"),
+            get("character/"),
           ]);
           // Store the data in local storage for later use
           localStorage.setItem(
@@ -99,6 +101,7 @@ function App() {
             month: monthName,
             year: yearAirDate,
             characters: charactersInEpisode,
+            id: episode.id
           };
         });
         // Find the first episode air date and set the selected month accordingly
@@ -120,7 +123,7 @@ function App() {
     fetchData();
   }, []);
 
-  // Filter the episodes by selected month only if the input value is empty
+  // Filter the episodes by selected month if the input value is empty, or by search input for all months
   useEffect(() => {
     if (searchInput === "") {
       setFilteredEpisodes(
@@ -171,7 +174,6 @@ function App() {
 
   return (
     <div className="App">
-
       {error && (
         <div className="error-message">
           An error occurred while trying to display the episodes of Rick & Morty
