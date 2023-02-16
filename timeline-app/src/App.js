@@ -13,6 +13,7 @@ import "./components/SearchBar.css";
 
 import { fullMonths, abbreviatedMonths } from "./constants/constants";
 
+
 // Reducer to update the selected month based on the action type
 const selectedMonthReducer = (state, action) => {
   const handlers = {
@@ -23,6 +24,16 @@ const selectedMonthReducer = (state, action) => {
   // Return the handler for the current action type, or return the current state if no handler exists
   const handle = handlers[action.type] || (() => state);
   return handle();
+};
+
+const get = async (endpoint) => {
+  try {
+    const res = await fetch(`https://rickandmortyapi.com/api/${endpoint}`);
+    const data = await res.json();
+    return { data, status: res.status, statusMessage: res.statusText };
+  } catch (error) {
+    return { data: {}, status: 0, statusMessage: error.message };
+  }
 };
 
 function App() {
@@ -53,8 +64,8 @@ function App() {
         } else {
           // If the data is not in local storage, fetch it from the API
           const [episodesData, charactersData] = await Promise.all([
-            fetch("https://rickandmortyapi.com/api/episode/"),
-            fetch("https://rickandmortyapi.com/api/character/"),
+          get("episode/"),
+          get("character/"),
           ]);
           // Store the data in local storage for later use
           localStorage.setItem(
