@@ -87,10 +87,18 @@ function App() {
         const episodesDataInLocalStorage = localStorage.getItem("episodesData");
         const charactersDataInLocalStorage =
           localStorage.getItem("charactersData");
+          
+        console.log("episodesDataInLocalStorage", episodesDataInLocalStorage);
+        console.log("charactersDataInLocalStorage", charactersDataInLocalStorage);
+    
         if (episodesDataInLocalStorage && charactersDataInLocalStorage) {
           // If the data is in local storage, parse it
           episodesData = JSON.parse(episodesDataInLocalStorage);
           charactersData = JSON.parse(charactersDataInLocalStorage);
+    
+          console.log("parsed episodes data", episodesData);
+          console.log("parsed characters data", charactersData);
+    
         } else {
           // If the data is not in local storage, fetch it from the API
           const [episodesResult, charactersResult] = await Promise.all([
@@ -99,6 +107,10 @@ function App() {
           ]);
           episodesData = episodesResult.data;
           charactersData = charactersResult.data;
+    
+          console.log("fetched episodes data", episodesData);
+          console.log("fetched characters data", charactersData);
+    
           // Store the data in local storage for later use
           localStorage.setItem(
             "episodesData",
@@ -109,10 +121,12 @@ function App() {
             JSON.stringify(charactersData)
           );
         }
+    
         const processedEpisodes = processEpisodesData(
           episodesData,
           charactersData
         );
+    
         // Find the first episode air date and set the selected month accordingly
         if (processedEpisodes.length > 0) {
           const firstEpisodeAirDate = processedEpisodes[0].air_date;
