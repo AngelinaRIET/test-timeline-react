@@ -85,8 +85,7 @@ function App() {
         let episodesData = {}, charactersData = {};
         // Check if the data is already in local storage
         const episodesDataInLocalStorage = localStorage.getItem("episodesData");
-        const charactersDataInLocalStorage =
-          localStorage.getItem("charactersData");
+        const charactersDataInLocalStorage = localStorage.getItem("charactersData");
   
         console.log("episodesDataInLocalStorage", episodesDataInLocalStorage);
         console.log("charactersDataInLocalStorage", charactersDataInLocalStorage);
@@ -112,14 +111,8 @@ function App() {
           console.log("fetched characters data", charactersData);
   
           // Store the data in local storage for later use
-          localStorage.setItem(
-            "episodesData",
-            JSON.stringify(episodesData)
-          );
-          localStorage.setItem(
-            "charactersData",
-            JSON.stringify(charactersData)
-          );
+          localStorage.setItem("episodesData", JSON.stringify(episodesData));
+          localStorage.setItem("charactersData", JSON.stringify(charactersData));
   
           console.log("saved episodes data", localStorage.getItem("episodesData"));
           console.log("saved characters data", localStorage.getItem("charactersData"));
@@ -132,7 +125,7 @@ function App() {
   
         // Find the first episode air date and set the selected month accordingly
         if (processedEpisodes.length > 0) {
-          const firstEpisodeAirDate = processedEpisodes[0].air_date;
+          const firstEpisodeAirDate = new Date(processedEpisodes[0].air_date);
           const firstEpisodeMonthIndex = firstEpisodeAirDate.getMonth();
           dispatchSelectedMonth({
             type: "set",
@@ -145,7 +138,7 @@ function App() {
       }
     };
     fetchData();
-  }, []);
+  }, []); 
   // Filter the episodes by selected month if the input value is empty, or by search input for all months
   useEffect(() => {
     if (searchInput === "") {
