@@ -13,18 +13,6 @@ import "./components/SearchBar.css";
 
 import { fullMonths, abbreviatedMonths } from "./constants/constants";
 
-// Reducer to update the selected month based on the action type
-const selectedMonthReducer = (state, action) => {
-  const handlers = {
-    prev: () => (state - 1 + 12) % 12,
-    next: () => (state + 1) % 12,
-    set: () => action.payload,
-  };
-  // Return the handler for the current action type, or return the current state if no handler exists
-  const handle = handlers[action.type] || (() => state);
-  return handle();
-};
-
 // Function to fetch data from the Rick & Morty API
 const get = async (endpoint, searchInput) => {
   try {
@@ -36,6 +24,46 @@ const get = async (endpoint, searchInput) => {
   } catch (error) {
     return { data: {}, status: 0, statusMessage: error.message };
   }
+};
+
+// Process the episodes data by extracting the relevant information
+const processEpisodesData = (episodesData, charactersData) => {
+  return episodesData.data.results.map((episode) => {
+    const fullAirDate = new Date(episode.air_date);
+    const dayAirDate = fullAirDate.getDate();
+    const monthIndex = fullAirDate.getMonth();
+    // abbreviatedMonths from the constants file
+    const monthName = abbreviatedMonths[monthIndex];
+    const yearAirDate = fullAirDate.getFullYear();
+
+    // Get the names of the characters in the episode
+    const charactersInEpisode = charactersData.data.results
+      .filter((character) => episode.characters.includes(character.url))
+      .map((character) => character.name);
+
+    return {
+      episodeName: episode.name,
+      episodeCode: episode.episode,
+      air_date: fullAirDate,
+      day: dayAirDate,
+      month: monthName,
+      year: yearAirDate,
+      characters: charactersInEpisode,
+      id: episode.id,
+    };
+  });
+};
+
+// Reducer to update the selected month based on the action type
+const selectedMonthReducer = (state, action) => {
+  const handlers = {
+    prev: () => (state - 1 + 12) % 12,
+    next: () => (state + 1) % 12,
+    set: () => action.payload,
+  };
+  // Return the handler for the current action type, or return the current state if no handler exists
+  const handle = handlers[action.type] || (() => state);
+  return handle();
 };
 
 function App() {
@@ -79,31 +107,10 @@ function App() {
             JSON.stringify(charactersData.data)
           );
         }
-        // Process the episodes data by extracting the relevant information
-        const processedEpisodes = episodesData.data.results.map((episode) => {
-          const fullAirDate = new Date(episode.air_date);
-          const dayAirDate = fullAirDate.getDate();
-          const monthIndex = fullAirDate.getMonth();
-          // abbreviatedMonths from the constants file
-          const monthName = abbreviatedMonths[monthIndex];
-          const yearAirDate = fullAirDate.getFullYear();
-
-          // Get the names of the characters in the episode
-          const charactersInEpisode = charactersData.data.results
-            .filter((character) => episode.characters.includes(character.url))
-            .map((character) => character.name);
-
-          return {
-            episodeName: episode.name,
-            episodeCode: episode.episode,
-            air_date: fullAirDate,
-            day: dayAirDate,
-            month: monthName,
-            year: yearAirDate,
-            characters: charactersInEpisode,
-            id: episode.id
-          };
-        });
+        const processedEpisodes = processEpisodesData(
+          episodesData,
+          charactersData
+        );
         // Find the first episode air date and set the selected month accordingly
         if (processedEpisodes.length > 0) {
           const firstEpisodeAirDate = processedEpisodes[0].air_date;
@@ -113,13 +120,11 @@ function App() {
             payload: firstEpisodeMonthIndex,
           });
         }
-
         setEpisodes(processedEpisodes);
       } catch (error) {
         setError(true);
       }
     };
-
     fetchData();
   }, []);
 
@@ -135,7 +140,7 @@ function App() {
     }
   }, [selectedMonth, episodes, searchInput]);
 
-  //MONTH BUTTONS (previous & next months)
+  // MONTH BUTTONS (previous & next months)
   const onMonthButtonClick = (value) => {
     if (value === -1) {
       dispatchSelectedMonth({ type: "prev" });
@@ -144,7 +149,7 @@ function App() {
     }
   };
 
-  //SEARCH BAR
+  // SEARCH BAR
   const onSearchInputChange = (e) => {
     setInputValue(e.target.value);
   };
