@@ -82,7 +82,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let episodesData, charactersData;
+        let episodesData = {}, charactersData = {};
         // Check if the data is already in local storage
         const episodesDataInLocalStorage = localStorage.getItem("episodesData");
         const charactersDataInLocalStorage =
@@ -93,18 +93,20 @@ function App() {
           charactersData = JSON.parse(charactersDataInLocalStorage);
         } else {
           // If the data is not in local storage, fetch it from the API
-          const [episodesData, charactersData] = await Promise.all([
+          const [episodesResult, charactersResult] = await Promise.all([
             get("episode/"),
             get("character/"),
           ]);
+          episodesData = episodesResult.data;
+          charactersData = charactersResult.data;
           // Store the data in local storage for later use
           localStorage.setItem(
             "episodesData",
-            JSON.stringify(episodesData.data)
+            JSON.stringify(episodesData)
           );
           localStorage.setItem(
             "charactersData",
-            JSON.stringify(charactersData.data)
+            JSON.stringify(charactersData)
           );
         }
         const processedEpisodes = processEpisodesData(
@@ -127,7 +129,6 @@ function App() {
     };
     fetchData();
   }, []);
-
   // Filter the episodes by selected month if the input value is empty, or by search input for all months
   useEffect(() => {
     if (searchInput === "") {
@@ -181,7 +182,7 @@ function App() {
     <div className="App">
       {error && (
         <div className="error-message">
-          An error occurred while trying to display the episodes of Rick & Morty
+          An error occurred while trying to display the episodes of Rick & Morty.
           Please try again later or check your network connection.
         </div>
       )}
