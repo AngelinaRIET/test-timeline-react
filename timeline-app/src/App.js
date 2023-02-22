@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useReducer,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useReducer, useCallback } from "react";
 import EpisodesTimeline from "./components/EpisodesTimeline";
 import SearchBar from "./components/SearchBar";
 
@@ -28,7 +22,7 @@ const get = async (endpoint, searchInput) => {
 
 // Process the episodes data by extracting the relevant information
 const processEpisodesData = (episodesData, charactersData) => {
-  return episodesData.data.results.map((episode) => {
+  return episodesData.map((episode) => {
     const fullAirDate = new Date(episode.air_date);
     const dayAirDate = fullAirDate.getDate();
     const monthIndex = fullAirDate.getMonth();
@@ -37,7 +31,7 @@ const processEpisodesData = (episodesData, charactersData) => {
     const yearAirDate = fullAirDate.getFullYear();
 
     // Get the names of the characters in the episode
-    const charactersInEpisode = charactersData.data.results
+    const charactersInEpisode = charactersData.results
       .filter((character) => episode.characters.includes(character.url))
       .map((character) => character.name);
 
@@ -54,6 +48,26 @@ const processEpisodesData = (episodesData, charactersData) => {
   });
 };
 
+function filterEpisodesByMonth(episodes, monthIndex) {
+  return episodes.filter((episode) => {
+    const episodeDate = new Date(episode.air_date);
+    return episodeDate.getMonth() === monthIndex;
+  });
+}
+
+function filterEpisodesBySearchInput(episodes, searchInput) {
+  return episodes.filter((episode) => {
+    return (
+      (episode.episodeCode ?? "")
+        .toLowerCase()
+        .includes(searchInput.toLowerCase()) ||
+      (episode.episodeName ?? "")
+        .toLowerCase()
+        .includes(searchInput.toLowerCase())
+    );
+  });
+}
+
 // Reducer to update the selected month based on the action type
 const selectedMonthReducer = (state, action) => {
   const handlers = {
@@ -68,36 +82,32 @@ const selectedMonthReducer = (state, action) => {
 
 function App() {
   const [episodes, setEpisodes] = useState([]);
-  const [searchInput, setInputValue] = useState("");
+  const [characters, setCharacters] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
   const [filteredEpisodes, setFilteredEpisodes] = useState([]);
   const [selectedMonth, dispatchSelectedMonth] = useReducer(
     selectedMonthReducer,
-    episodes.length > 0 ? episodes[0].air_date.getMonth() : 0
+    0
   );
 
   // State to store if an error occurred during the API call
   const [error, setError] = useState(false);
 
-  // Fetch data from Rick & Morty API and process it
+  // Fetch data from Rick & Morty API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let episodesData = {}, charactersData = {};
+        let episodesData;
+        let charactersData;
         // Check if the data is already in local storage
         const episodesDataInLocalStorage = localStorage.getItem("episodesData");
-        const charactersDataInLocalStorage = localStorage.getItem("charactersData");
-  
-        console.log("episodesDataInLocalStorage", episodesDataInLocalStorage);
-        console.log("charactersDataInLocalStorage", charactersDataInLocalStorage);
-  
+        const charactersDataInLocalStorage =
+          localStorage.getItem("charactersData");
+
         if (episodesDataInLocalStorage && charactersDataInLocalStorage) {
           // If the data is in local storage, parse it
           episodesData = JSON.parse(episodesDataInLocalStorage);
           charactersData = JSON.parse(charactersDataInLocalStorage);
-  
-          console.log("parsed episodes data", episodesData);
-          console.log("parsed characters data", charactersData);
-  
         } else {
           // If the data is not in local storage, fetch it from the API
           const [episodesResult, charactersResult] = await Promise.all([
@@ -106,50 +116,38 @@ function App() {
           ]);
           episodesData = episodesResult.data;
           charactersData = charactersResult.data;
-  
-          console.log("fetched episodes data", episodesData);
-          console.log("fetched characters data", charactersData);
-  
+
           // Store the data in local storage for later use
           localStorage.setItem("episodesData", JSON.stringify(episodesData));
-          localStorage.setItem("charactersData", JSON.stringify(charactersData));
-  
-          console.log("saved episodes data", localStorage.getItem("episodesData"));
-          console.log("saved characters data", localStorage.getItem("charactersData"));
+          localStorage.setItem(
+            "charactersData",
+            JSON.stringify(charactersData)
+          );
         }
-  
-        const processedEpisodes = processEpisodesData(
-          episodesData,
-          charactersData
-        );
-  
-        // Find the first episode air date and set the selected month accordingly
-        if (processedEpisodes.length > 0) {
-          const firstEpisodeAirDate = new Date(processedEpisodes[0].air_date);
-          const firstEpisodeMonthIndex = firstEpisodeAirDate.getMonth();
-          dispatchSelectedMonth({
-            type: "set",
-            payload: firstEpisodeMonthIndex,
-          });
-        }
-        setEpisodes(processedEpisodes);
+
+        setEpisodes(episodesData.results);
+        setCharacters(charactersData);
+
+        // Get the month index of the first episode
+        const firstEpisodeMonthIndex = new Date(
+          episodesData.results[0].air_date
+        ).getMonth();
+        dispatchSelectedMonth({ type: "set", payload: firstEpisodeMonthIndex });
       } catch (error) {
         setError(true);
       }
     };
+
     fetchData();
-  }, []); 
-  // Filter the episodes by selected month if the input value is empty, or by search input for all months
+  }, []);
+
   useEffect(() => {
-    if (searchInput === "") {
-      setFilteredEpisodes(
-        episodes.filter((episode) => {
-          const episodeDate = new Date(episode.air_date);
-          return episodeDate.getMonth() === selectedMonth;
-        })
-      );
+    if (episodes.length > 0 && characters) {
+      const processedEpisodes = processEpisodesData(episodes, characters);
+      let filtered = filterEpisodesByMonth(processedEpisodes, selectedMonth);
+      setFilteredEpisodes(filtered);
     }
-  }, [selectedMonth, episodes, searchInput]);
+  }, [episodes, characters, selectedMonth]);
 
   // MONTH BUTTONS (previous & next months)
   const onMonthButtonClick = (value) => {
@@ -162,38 +160,30 @@ function App() {
 
   // SEARCH BAR
   const onSearchInputChange = (e) => {
-    setInputValue(e.target.value);
+    setSearchInput(e.target.value);
   };
-
-  const filteredEpisodesBySearchInput = useMemo(
-    () =>
-      episodes.filter((episode) => {
-        return (
-          episode.episodeCode
-            .toLowerCase()
-            .includes(searchInput.toLowerCase()) ||
-          episode.episodeName.toLowerCase().includes(searchInput.toLowerCase())
-        );
-      }),
-    [searchInput, episodes]
-  );
 
   const onSearchSubmit = useCallback(
     (e) => {
       e.preventDefault();
       if (searchInput !== "") {
-        setFilteredEpisodes(filteredEpisodesBySearchInput);
+        const processedEpisodes = processEpisodesData(episodes, characters);
+        const filtered = filterEpisodesBySearchInput(
+          processedEpisodes,
+          searchInput
+        );
+        setFilteredEpisodes(filtered);
       }
     },
-    [searchInput, filteredEpisodesBySearchInput]
+    [searchInput, episodes, characters]
   );
 
   return (
     <div className="App">
       {error && (
         <div className="error-message">
-          An error occurred while trying to display the episodes of Rick & Morty.
-          Please try again later or check your network connection.
+          An error occurred while trying to display the episodes of Rick &
+          Morty. Please try again later or check your network connection.
         </div>
       )}
       <SearchBar

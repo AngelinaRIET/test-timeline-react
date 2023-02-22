@@ -72,6 +72,7 @@ function EpisodesTimeline({
   dispatchSelectedMonth,
   months,
   selectedMonth,
+  filteredEpisodes,
 }) {
   const classes = useStyles();
 
