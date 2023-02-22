@@ -8,14 +8,17 @@ import "./components/SearchBar.css";
 import { fullMonths, abbreviatedMonths } from "./constants/constants";
 
 // Function to fetch data from the Rick & Morty API
-const get = async (endpoint, searchInput) => {
+const get = async (endpoint) => {
   try {
-    const res = await fetch(
-      `https://rickandmortyapi.com/api/${endpoint}?name=${searchInput}`
-    );
+    const res = await fetch(`https://rickandmortyapi.com/api/${endpoint}`);
+    if (!res.ok) {
+      // If the API returns an error status, throw an error with the status and statusText
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
     const data = await res.json();
     return { data, status: res.status, statusMessage: res.statusText };
   } catch (error) {
+    // If an error occurs during the fetch, return an object with empty data and the error message
     return { data: {}, status: 0, statusMessage: error.message };
   }
 };
@@ -32,8 +35,10 @@ const processEpisodesData = (episodesData, charactersData) => {
 
     // Get the names of the characters in the episode
     const charactersInEpisode = charactersData.results
-      .filter((character) => episode.characters.includes(character.url))
-      .map((character) => character.name);
+      ? charactersData.results
+          .filter((character) => episode.characters.includes(character.url))
+          .map((character) => character.name)
+      : [];
 
     return {
       episodeName: episode.name,
@@ -95,39 +100,36 @@ function App() {
 
   // Fetch data from Rick & Morty API
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (searchInput) => {
       try {
-        let episodesData;
-        let charactersData;
         // Check if the data is already in local storage
         const episodesDataInLocalStorage = localStorage.getItem("episodesData");
-        const charactersDataInLocalStorage =
-          localStorage.getItem("charactersData");
-
+        const charactersDataInLocalStorage = localStorage.getItem("charactersData");
+    
+        let episodesData;
+        let charactersData;
+    
         if (episodesDataInLocalStorage && charactersDataInLocalStorage) {
           // If the data is in local storage, parse it
           episodesData = JSON.parse(episodesDataInLocalStorage);
           charactersData = JSON.parse(charactersDataInLocalStorage);
         } else {
           // If the data is not in local storage, fetch it from the API
-          const [episodesResult, charactersResult] = await Promise.all([
-            get("episode/"),
-            get("character/"),
+          const [episodesResponse, charactersResponse] = await Promise.all([
+            get(`episode/`, searchInput),
+            get(`character/`, searchInput),
           ]);
-          episodesData = episodesResult.data;
-          charactersData = charactersResult.data;
-
+          episodesData = episodesResponse.data;
+          charactersData = charactersResponse.data;
+    
           // Store the data in local storage for later use
           localStorage.setItem("episodesData", JSON.stringify(episodesData));
-          localStorage.setItem(
-            "charactersData",
-            JSON.stringify(charactersData)
-          );
+          localStorage.setItem("charactersData", JSON.stringify(charactersData));
         }
-
+    
         setEpisodes(episodesData.results);
         setCharacters(charactersData);
-
+    
         // Get the month index of the first episode
         const firstEpisodeMonthIndex = new Date(
           episodesData.results[0].air_date
@@ -138,8 +140,8 @@ function App() {
       }
     };
 
-    fetchData();
-  }, []);
+    fetchData(searchInput);
+  }, [searchInput]);
 
   useEffect(() => {
     if (episodes.length > 0 && characters) {
@@ -150,13 +152,9 @@ function App() {
   }, [episodes, characters, selectedMonth]);
 
   // MONTH BUTTONS (previous & next months)
-  const onMonthButtonClick = (value) => {
-    if (value === -1) {
-      dispatchSelectedMonth({ type: "prev" });
-    } else {
-      dispatchSelectedMonth({ type: "next" });
-    }
-  };
+  const onMonthButtonClick = useCallback((value) => {
+    dispatchSelectedMonth({ type: value === -1 ? "prev" : "next" });
+  }, [dispatchSelectedMonth]);
 
   // SEARCH BAR
   const onSearchInputChange = (e) => {
